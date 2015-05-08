@@ -43,6 +43,7 @@ class FakeSmsChat:
 
     def add_sms(self, text, me):
         # TODO: в качестве развития, можно добавлять время отправки
+        # TODO: при добавлении высчитывать размер облачка смс
 
         self.sms_chats.append(
             (text, me)
