@@ -22,7 +22,6 @@ __author__ = 'ipetrash'
 # и получаешь сгенерированную картинку
 # Потом сделать gui'шный вариант с предпросмотром
 
-# TODO: рисовать тени под облачками
 # TODO: поиграть с градиентами
 
 from PySide.QtGui import *
@@ -170,6 +169,8 @@ class FakeSmsChat:
             # "Мои" смс будут находиться с левой стороны, а собеседника с правой стороны
             x = self.left_indent if me else w_im - w - self.right_indent
 
+            # Рисуем тень облачка смс
+            self.drawSmsCloud(x + 1, last_y + 1, w, h, p, Qt.black, sms)
             self.drawSmsCloud(x, last_y, w, h, p, sms_color, sms)
             self.drawSmsText(x, last_y, w, h, p, text_color, sms)
             self.drawSmsTime(x, last_y, w, h, p, sms)
