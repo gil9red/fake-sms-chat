@@ -104,6 +104,7 @@ class FakeSmsChat:
         return w + 40, h + 40
 
     def drawSmsCloud(self, x, y, w, h, painter, color, sms):
+        painter.save()
         painter.setPen(color)
         painter.setBrush(color)
 
@@ -124,11 +125,14 @@ class FakeSmsChat:
         path.closeSubpath()
 
         painter.drawPath(path)
+        painter.restore()
 
     def drawSmsText(self, x, y, w, h, painter, color, sms):
+        painter.save()
         painter.setFont(self.font)
         painter.setPen(color)
         painter.drawText(x, y, w, h, Qt.AlignCenter, sms.text)
+        painter.restore()
 
     def drawSmsTime(self, x, y, w, h, painter, sms):
         time_w, time_h = sms.get_time_sms_size(self.font_time)
@@ -141,8 +145,10 @@ class FakeSmsChat:
             # Из горизонтального положения смс вычитаем его ширину и отступ текста времени отправки
             time_x = x - time_w - self.indent_time
 
+        painter.save()
         painter.setFont(self.font_time)
         painter.drawText(time_x, y, time_w, h, Qt.AlignCenter, sms.time)
+        painter.restore()
 
     def get_QImage(self):
         """Отрисовка смс диалога на QImage"""
@@ -177,30 +183,7 @@ class FakeSmsChat:
 
             last_y += h + self.indent
 
-        # # Обнуляем ссылку на QPainter
-        # p = None
+        # Обнуляем ссылку на QPainter
+        p = None
 
         return im
-
-
-app = QApplication(sys.argv)
-
-
-fake = FakeSmsChat()
-fake.add_me_sms('Кек, а меня уволили.', '10:01')
-fake.add_other_sms('за что уже?', '10:02')
-fake.add_me_sms('За то что у кошки\n роды принимал.', '10:03')
-fake.add_other_sms('ШТОООА7', '10:04')
-fake.add_other_sms('прям на работе?')
-fake.add_me_sms('Нет. Я один день не \nвышел на работу.')
-fake.add_other_sms('зато у тебя есть котики', '10:07')
-fake.add_other_sms('котики - это хорошо')
-
-im = fake.get_QImage()
-im.save('fakesms.png')
-
-# l = QLabel()
-# l.setPixmap(QPixmap.fromImage(im))
-# l.show()
-#
-# sys.exit(app.exec_())
