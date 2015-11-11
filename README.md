@@ -2,8 +2,6 @@
 Генератор фейкового смс чата (#python #python3 #sms #fake)
 
 ##### Пример:
-    app = QApplication(sys.argv)
-
     fake = FakeSmsChat()
     fake.add_me_sms('Кек, а меня уволили.', '10:01')
     fake.add_other_sms('за что уже?', '10:02')
