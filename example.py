@@ -3,11 +3,9 @@
 
 __author__ = 'ipetrash'
 
-from FakeSmsChat import *
+from fake_sms_chat import *
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-
     fake = FakeSmsChat()
     fake.add_me_sms('Кек, а меня уволили.', '10:01')
     fake.add_other_sms('за что уже?', '10:02')
@@ -19,4 +17,4 @@ if __name__ == '__main__':
     fake.add_other_sms('котики - это хорошо')
 
     im = fake.get_QImage()
-    im.save('fakesms.png')
+    im.save('fakesms2.png')

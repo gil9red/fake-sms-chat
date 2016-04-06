@@ -26,7 +26,7 @@ __author__ = 'ipetrash'
 
 from PySide.QtGui import *
 from PySide.QtCore import *
-import sys
+
 
 class Sms:
     def __init__(self, me, text, time):
@@ -57,6 +57,9 @@ class Sms:
 
 class FakeSmsChat:
     def __init__(self):
+        import sys
+        QApplication(sys.argv)
+
         self.sms_chats = []
         self.font = QFont('Tahoma', 10)
         self.me_color = QColor(0, 255, 120)
@@ -103,7 +106,7 @@ class FakeSmsChat:
         # Немного добавим размера
         return w + 40, h + 40
 
-    def drawSmsCloud(self, x, y, w, h, painter, color, sms):
+    def draw_sms_cloud(self, x, y, w, h, painter, color, sms):
         painter.save()
         painter.setPen(color)
         painter.setBrush(color)
@@ -127,14 +130,14 @@ class FakeSmsChat:
         painter.drawPath(path)
         painter.restore()
 
-    def drawSmsText(self, x, y, w, h, painter, color, sms):
+    def draw_sms_text(self, x, y, w, h, painter, color, sms):
         painter.save()
         painter.setFont(self.font)
         painter.setPen(color)
         painter.drawText(x, y, w, h, Qt.AlignCenter, sms.text)
         painter.restore()
 
-    def drawSmsTime(self, x, y, w, h, painter, sms):
+    def draw_sms_time(self, x, y, w, h, painter, sms):
         time_w, time_h = sms.get_time_sms_size(self.font_time)
 
         # Высчитываем горизонтальное положение текста с временем отправки смс
@@ -176,10 +179,10 @@ class FakeSmsChat:
             x = self.left_indent if me else w_im - w - self.right_indent
 
             # Рисуем тень облачка смс
-            self.drawSmsCloud(x + 1, last_y + 1, w, h, p, Qt.black, sms)
-            self.drawSmsCloud(x, last_y, w, h, p, sms_color, sms)
-            self.drawSmsText(x, last_y, w, h, p, text_color, sms)
-            self.drawSmsTime(x, last_y, w, h, p, sms)
+            self.draw_sms_cloud(x + 1, last_y + 1, w, h, p, Qt.black, sms)
+            self.draw_sms_cloud(x, last_y, w, h, p, sms_color, sms)
+            self.draw_sms_text(x, last_y, w, h, p, text_color, sms)
+            self.draw_sms_time(x, last_y, w, h, p, sms)
 
             last_y += h + self.indent
 
