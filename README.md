@@ -17,4 +17,4 @@
 
 ##### Результат:
 
-![](https://raw.githubusercontent.com/gil9red/fake-sms-chat/master/fakesms.png)
+![](fakesms.png)
