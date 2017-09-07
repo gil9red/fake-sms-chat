@@ -4,28 +4,50 @@
 __author__ = 'ipetrash'
 
 
-# Написать генератор переписки
-# Пример:
-# big_cbe19cc65a4b10e3d7f3658bfa9f845a.jpg
-# bXxitzIH4JPg.jpg
-#
-# // Очень простой стиль облачка сообщения:
-# big_93524ee2aa1ed71f35f086eafc04c0d0.jpg
-# big_213bdee063ce096c2f8154f4e7e174fe.jpg
-# http://stackoverflow.com/questions/13364231/qpainterdrawtext-get-bounding-boxes-for-each-character
-# http://doc.qt.io/qt-4.8/qpainter.html#drawText-10
-# http://doc.qt.io/qt-4.8/qt.html#TextFlag-enum
+try:
+    from PyQt5.QtWidgets import QApplication
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
 
-# generator of the fake sms chat
-# генератор фейкового смс чата
-# TODO: сделать сначала консольный вариант, которому кормишь текст
-# и получаешь сгенерированную картинку
-# Потом сделать gui'шный вариант с предпросмотром
+except:
+    try:
+        from PyQt4.QtGui import *
+        from PyQt4.QtCore import *
 
-# TODO: поиграть с градиентами
+    except:
+        from PySide.QtGui import *
+        from PySide.QtCore import *
 
-from PySide.QtGui import *
-from PySide.QtCore import *
+
+def log_uncaught_exceptions(ex_cls, ex, tb):
+    text = '{}: {}:\n'.format(ex_cls.__name__, ex)
+    import traceback
+    text += ''.join(traceback.format_tb(tb))
+
+    print(text)
+    QMessageBox.critical(None, 'Error', text)
+    quit()
+
+import sys
+sys.excepthook = log_uncaught_exceptions
+
+
+_APP = QApplication(sys.argv)
+
+
+NEED_ICON = True
+
+if NEED_ICON:
+    import os
+    current_dir = os.path.dirname(__file__)
+    file_name_from_icon = os.path.join(current_dir, 'from.png')
+    file_name_to_icon = os.path.join(current_dir, 'to.png')
+else:
+    file_name_from_icon = ''
+    file_name_to_icon = ''
+
+FROM_ICON = QPixmap(file_name_from_icon)
+TO_ICON = QPixmap(file_name_to_icon)
 
 
 class Sms:
@@ -33,6 +55,7 @@ class Sms:
         self.me = me
         self.text = text
         self.time = time
+        self.icon = FROM_ICON if me else TO_ICON
 
     def get_sms_size(self, font):
         """Функция возвращает размеры облачка смс"""
@@ -46,7 +69,7 @@ class Sms:
             w = max(w, text_rect.width())
             h += text_rect.height()
 
-        return w + 15, h + 15
+        return w + 15 + self.icon.width(), h + 15
 
     def get_time_sms_size(self, font):
         """Функция возвращает размеры текст с временем смс"""
@@ -57,9 +80,6 @@ class Sms:
 
 class FakeSmsChat:
     def __init__(self):
-        import sys
-        QApplication(sys.argv)
-
         self.sms_chats = []
         self.font = QFont('Tahoma', 10)
         self.me_color = QColor(0, 255, 120)
@@ -113,7 +133,14 @@ class FakeSmsChat:
 
         path = QPainterPath()
         path.setFillRule(Qt.WindingFill)
-        path.addRoundRect(x, y, w, h, 5, 5)
+
+        try:
+            # Qt4
+            path.addRoundRect(x, y, w, h, 5, 5)
+
+        except:
+            # Qt5
+            path.addRoundedRect(x, y, w, h, 5, 5)
 
         # Нарисуем треугольник сбоку от прямоугольника
         if sms.me:
@@ -134,8 +161,19 @@ class FakeSmsChat:
         painter.save()
         painter.setFont(self.font)
         painter.setPen(color)
-        painter.drawText(x, y, w, h, Qt.AlignCenter, sms.text)
+
+        if sms.me:
+            align = Qt.AlignVCenter | Qt.AlignRight
+        else:
+            align = Qt.AlignVCenter | Qt.AlignLeft
+
+        painter.drawText(x, y, w, h, align, sms.text)
         painter.restore()
+
+    def draw_sms_icon(self, x, y, painter, sms):
+        w = sms.icon.width()
+        h = sms.icon.height()
+        painter.drawPixmap(x, y, w, h, sms.icon)
 
     def draw_sms_time(self, x, y, w, h, painter, sms):
         time_w, time_h = sms.get_time_sms_size(self.font_time)
@@ -181,7 +219,20 @@ class FakeSmsChat:
             # Рисуем тень облачка смс
             self.draw_sms_cloud(x + 1, last_y + 1, w, h, p, Qt.black, sms)
             self.draw_sms_cloud(x, last_y, w, h, p, sms_color, sms)
-            self.draw_sms_text(x, last_y, w, h, p, text_color, sms)
+
+            self.draw_sms_text(x + (-5 if me else 5), last_y, w, h, p, text_color, sms)
+
+            x_icon = x
+            if me:
+                x_icon += 5
+            else:
+                x_icon += w - sms.icon.width() - 5
+
+            # Center on height
+            y_icon = last_y + h / 2 - sms.icon.height() / 2
+
+            self.draw_sms_icon(x_icon, y_icon, p, sms)
+
             self.draw_sms_time(x, last_y, w, h, p, sms)
 
             last_y += h + self.indent
